@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "285183919250",
+    "firebase_url": "https://exams-online-56a7d-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "exams-online-56a7d",
+    "storage_bucket": "exams-online-56a7d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:285183919250:android:90f7c1bcf196771890d24b",
+        "android_client_info": {
+          "package_name": "com.example.onlineexams"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUWAiNFaT3mo0CMbpQZxhO0lSoAE8Rym4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
