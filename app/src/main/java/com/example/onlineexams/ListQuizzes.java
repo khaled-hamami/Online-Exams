@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -89,15 +90,21 @@ public class ListQuizzes extends AppCompatActivity {
                 }
             };
             database.addValueEventListener(listener);
-        } else if (createdQuizzes) {
+        }else if (createdQuizzes) {
             ValueEventListener listener = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     DataSnapshot ds = snapshot.child("Users").child(uid).child("Quizzes Created");
                     for (DataSnapshot f : ds.getChildren()) {
                         ids.add(f.getKey());
-                        data.add(snapshot.child("Quizzes").child(f.getKey()).child("Title").getValue().toString());
+                        Object titleObj = snapshot.child("Quizzes").child(f.getKey()).child("Title").getValue();
+                        if (titleObj != null) {
+                            data.add(titleObj.toString());
+                        } else {
+                            data.add("Unknown Title");
+                        }
                     }
+
                 }
 
                 @Override
@@ -106,7 +113,7 @@ public class ListQuizzes extends AppCompatActivity {
                 }
             };
             database.addValueEventListener(listener);
-        } else if (quizGrades) {
+        }  else if (quizGrades) {
             ValueEventListener listener = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -123,7 +130,7 @@ public class ListQuizzes extends AppCompatActivity {
                                 .getValue().toString();
                         String total = snapshot.child("Quizzes").child(quizID)
                                 .child("Total Questions").getValue().toString();
-                        String grade = points+"/"+total;
+                        String grade = points + "/" + total;
                         grades.add(grade);
                     }
                 }
@@ -170,6 +177,8 @@ public class ListQuizzes extends AppCompatActivity {
             TextView grade = v.findViewById(R.id.grade);
             TextView quiz = v.findViewById(R.id.quiz);
             RelativeLayout item = v.findViewById(R.id.item);
+            Button deleteButton = v.findViewById(R.id.deleteButton);
+
 
             quiz.setText(arr.get(i));
 
@@ -179,13 +188,39 @@ public class ListQuizzes extends AppCompatActivity {
                 grade.setVisibility(View.GONE);
             }
 
-            if (solvedQuizzes) {
+
+
+            if (createdQuizzes) {
+                deleteButton.setVisibility(View.VISIBLE);
+                deleteButton.setOnClickListener(view1 -> {
+                    String quizIdToDelete = ids.get(i);
+                    DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+                    database.child("Quizzes").child(quizIdToDelete).removeValue().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(ListQuizzes.this, "Quiz deleted", Toast.LENGTH_SHORT).show();
+                            arr.remove(i);
+                            ids.remove(i);
+                            notifyDataSetChanged();
+                        } else {
+                            Toast.makeText(ListQuizzes.this, "Failed to delete quiz", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
+            } else {
+                deleteButton.setVisibility(View.GONE);
+            }
+
+
+                if (solvedQuizzes) {
                 item.setOnClickListener(view1 -> {
                     Intent intent = new Intent(ListQuizzes.this, Result.class);
                     intent.putExtra("Quiz ID", ids.get(i));
                     startActivity(intent);
                 });
+
             } else if (createdQuizzes) {
+
+
                 item.setOnClickListener(view1 -> {
                     Intent intent = new Intent(ListQuizzes.this, ListQuizzes.class);
                     intent.putExtra("Operation", "List Quiz Grades");
@@ -193,7 +228,9 @@ public class ListQuizzes extends AppCompatActivity {
                     intent.putExtra("Quiz Title", arr.get(i));
                     startActivity(intent);
                 });
+
             } else if (quizGrades) {
+
                 grade.setText(grades.get(i));
                 item.setOnClickListener(view1 -> {
                     Intent intent = new Intent(ListQuizzes.this, Result.class);
